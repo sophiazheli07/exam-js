@@ -11,17 +11,19 @@
 
     <div class="container">
         <h1>Music Platform</h1>
+        <button id="watch-list-switcher">Go to Added Tracks</button>
     
         <form id="searchForm">
           <input type="text" id="searchInput" placeholder="Search for music">
-          <button type="submit">Search</button>
+          <button id="search-button" type="submit">Search</button>
         </form>
     
-        <div id="resultsContainer"></div>
-    
-        <h2>Watchlist</h2>
-        <div id="watchlistContainer"></div>
+        <div id="output"></div>
       </div>
+
+      <section id="watchList">
+        <div id="watchlistContainer"></div>
+      </section>
     
     
     <script src="index.js"></script>

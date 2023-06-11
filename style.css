@@ -22,7 +22,7 @@ body {
     font-size: 16px;
   }
   
-  #resultsContainer {
+  #output {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
