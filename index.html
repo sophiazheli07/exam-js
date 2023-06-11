@@ -1,31 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Mini Music Platform</h1>
+      <button id="switchButton">Switch Pages</button>
+    </header>
 
-    <div class="container">
-        <h1>Music Platform</h1>
-        <button id="watch-list-switcher">Go to Added Tracks</button>
-    
-        <form id="searchForm">
-          <input type="text" id="searchInput" placeholder="Search for music">
-          <button id="search-button" type="submit">Search</button>
-        </form>
-    
-        <div id="output"></div>
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Search..." />
+      <button id="search-button">Search</button>
+    </div>
+    <div id="results-container"></div>
+    <hr />
+    <div id="favorites-container"></div>
+    <div id="waveform"></div>
+
+    <div class="wrapper">
+      <div class="boxContainer">
+        <div class="box box1"></div>
+        <div class="box box2"></div>
+        <div class="box box3"></div>
+        <div class="box box4"></div>
+        <div class="box box5"></div>
+        <div class="box box6"></div>
+        <div class="box box7"></div>
+        <div class="box box8"></div>
       </div>
+    </div>
 
-      <section id="watchList">
-        <div id="watchlistContainer"></div>
-      </section>
-    
-    
     <script src="index.js"></script>
-</body>
+  </body>
 </html>

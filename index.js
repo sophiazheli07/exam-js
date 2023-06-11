@@ -1,125 +1,145 @@
-class MusicPlatform {
-  constructor() {
-    this.searchForm = document.getElementById("searchForm");
-    this.searchInput = document.getElementById("searchInput");
-    this.resultsContainer = document.getElementById("output");
-    this.watchlistContainer = document.getElementById("watchlistContainer");
-  
-    this.searchForm.onsubmit = () => this.handleSearch(event);
-    this.resultsContainer.onclick = (event) => this.handleAddToWatchlist(event);
-    this.watchlistContainer.onclick = (event) => this.handleRemoveFromWatchlist(event);
-  
-    this.renderWatchlist();
-  }
-  
 
-  handleSearch(event) {
-    event.preventDefault();
-    const searchQuery = this.searchInput.value.trim();
-    this.searchTracks(searchQuery);
-  }
+const API_KEY = "bb71f6d0a5msh8bea47b10b6fd85p1e95cbjsnac5a7c3dc7df";
 
-  searchTracks(query) {
-    fetch(`https://deezerdevs-deezer.p.rapidapi.com/search?q=${query}`, {
-      method: "GET",
-      headers: {
-        "x-rapidapi-key": "bb71f6d0a5msh8bea47b10b6fd85p1e95cbjsnac5a7c3dc7df",
-        "x-rapidapi-host": "deezerdevs-deezer.p.rapidapi.com",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        this.displayResults(data.data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }
+const searchInput = document.getElementById('search-input');
+const searchButton = document.getElementById('search-button');
+const resultsContainer = document.getElementById('results-container');
+const favoritesContainer = document.getElementById('favorites-container');
+const scrollButton  = document.getElementById('switchButton');
 
-  displayResults(tracks) {
-    this.resultsContainer.innerHTML = "";
-    const watchlist = this.getWatchlistData();
+searchButton.addEventListener('click', searchTracks);
+favoritesContainer.addEventListener('click', removeFavorite);
 
-    tracks.forEach((track) => {
-      const card = document.createElement("div");
-      card.classList.add("card");
-
-      card.innerHTML = `
-        <img src="${track.album.cover_medium}">
-        <p>${track.title}</p>
-        <p>${track.artist.name}</p>
-        <button data-track="${JSON.stringify(track)}">${
-        watchlist.some((item) => item.id === track.id)
-          ? "Added"
-          : "Add to Watchlist"
-      }</button>
-      `;
-
-      if (watchlist.some((item) => item.id === track.id)) {
-        card.classList.add("added");
-      }
-
-      this.resultsContainer.appendChild(card);
-    });
-  }
-
-  handleAddToWatchlist(event) {
-    if (event.target.tagName === "BUTTON") {
-      const trackData = event.target.dataset.track;
-      this.addWatchlistData(JSON.parse(trackData));
-    }
-  }
-
-  addWatchlistData(track) {
-    let watchlist = this.getWatchlistData();
-    watchlist.push(track);
-    localStorage.setItem("watchlist", JSON.stringify(watchlist));
-    this.renderWatchlist();
-    alert("Track added to watchlist!");
-  }
-
-  handleRemoveFromWatchlist(event) {
-    if (event.target.tagName === "BUTTON") {
-      const trackId = event.target.getAttribute("data-track-id");
-      this.removeWatchlistData(trackId);
-    }
-  }
-
-  removeWatchlistData(trackId) {
-    let watchlist = this.getWatchlistData();
-    watchlist = watchlist.filter(
-      (track) => track.id.toString() !== trackId.toString()
-    );
-    localStorage.setItem("watchlist", JSON.stringify(watchlist));
-    this.renderWatchlist();
-    alert("Track removed from watchlist!");
-  }
-
-  getWatchlistData() {
-    const watchlist = localStorage.getItem("watchlist");
-    return watchlist ? JSON.parse(watchlist) : [];
-  }
-
-  renderWatchlist() {
-    const watchlist = this.getWatchlistData();
-    this.watchlistContainer.innerHTML = "";
-
-    watchlist.forEach((track) => {
-      const card = document.createElement("div");
-      card.classList.add("card");
-
-      card.innerHTML = `
-        <img src="${track.album.cover_medium}">
-        <p>${track.title}</p>
-        <p>${track.artist.name}</p>
-        <button class="removeFromWatchlistButton" data-track-id="${track.id}">Remove from Watchlist</button>
-      `;
-
-      this.watchlistContainer.appendChild(card);
-    });
+switchButton.onclick = function() {
+  if (resultsContainer.style.display !== 'none') {
+    resultsContainer.style.display = 'none';
+    favoritesContainer.style.display = 'flex';
+  } else {
+    resultsContainer.style.display = 'flex';
+    favoritesContainer.style.display = 'none';
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const musicPlatform = new MusicPlatform();
-});
+function searchTracks() {
+    const query = searchInput.value.trim();
+    if (query === '') {
+        return;
+    }
+
+    resultsContainer.innerHTML = '';
+
+    fetch(`https://deezerdevs-deezer.p.rapidapi.com/search?q=${query}`, {
+        method: 'GET',
+        headers: {
+            'x-rapidapi-host': 'deezerdevs-deezer.p.rapidapi.com',
+            'x-rapidapi-key': API_KEY
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const tracks = data.data;
+        if (tracks.length === 0) {
+            resultsContainer.innerHTML = 'No results found.';
+        } else {
+            displayTracks(tracks);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        resultsContainer.innerHTML = 'An error occurred.';
+    });
+}
+
+function displayTracks(tracks) {
+  if (!tracks || tracks.length === 0) {
+      resultsContainer.innerHTML = 'No results found.';
+      return;
+  }
+
+  tracks.forEach(track => {
+      const card = createCard(track);
+      resultsContainer.appendChild(card);
+  });
+}
+
+// Create card
+function createCard(track) {
+  const card = document.createElement('div');
+  card.classList.add('card');
+  
+  card.innerHTML = `
+    <img src="${track.album.cover_medium}" alt="${track.album.title}">
+   <div class="content-wrapper">
+    <h3>${track.title}</h3>
+    <p>${track.artist.name}</p>
+    <p>${track.album.title}</p>
+    </div>
+    <div class="audio-container">
+      <audio src="${track.preview}" controls></audio>
+    </div>
+    <button>Add to Favorites</button>
+  `;
+  
+  const addButton = card.querySelector('button');
+  addButton.addEventListener('click', () => addToFavorites(addButton, track));
+  
+  const favorites = getFavorites();
+  if (favorites.some(favorite => favorite.id === track.id)) {
+      card.classList.add('favorite');
+      addButton.disabled = true;
+  }
+
+  return card;
+}
+
+function addToFavorites(button, track) {
+  const favorites = getFavorites();
+  favorites.push(track);
+  saveFavorites(favorites);
+  displayFavorites(favorites);
+
+  button.disabled = true;
+  button.textContent = 'Added to Favorites';
+  button.classList.add('added-to-favorites');
+}
+
+function getFavorites() {
+    const favorites = localStorage.getItem('favorites');
+    return favorites ? JSON.parse(favorites) : [];
+}
+
+function saveFavorites(favorites) {
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+}
+
+function displayFavorites(favorites) {
+    favoritesContainer.innerHTML = '';
+
+    if (favorites.length === 0) {
+        favoritesContainer.innerHTML = 'No favorites added yet.';
+    } else {
+        favorites.forEach(track => {
+            const card = createCard(track);
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove from Favorites';
+            removeButton.addEventListener('click', () => removeFavorite(track));
+            card.appendChild(removeButton);
+            favoritesContainer.appendChild(card);
+        });
+    }
+}
+
+function removeFavorite(track) {
+    const favorites = getFavorites();
+    const index = favorites.findIndex(favorite => favorite.id === track.id);
+    if (index > -1) {
+        favorites.splice(index, 1);
+        saveFavorites(favorites);
+        displayFavorites(favorites);
+    }
+}
+
+
+const initialFavorites = getFavorites();
+displayFavorites(initialFavorites);
+
