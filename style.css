@@ -1,11 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Prompt:wght@100;200;300;400;500;600;700;800&display=swap");
 
-  body {
+body {
   font-family: Arial, sans-serif;
   padding: 20px;
   background: #414042;
-  font-family: 'Prompt', sans-serif;;
+  font-family: "Prompt", sans-serif;
   padding-top: 150px;
+  padding-bottom: 150px;
 }
 header {
   position: fixed;
@@ -50,7 +51,6 @@ button {
   color: #f1f1f1;
 }
 
-
 #results-container {
   display: flex;
   flex-wrap: wrap;
@@ -76,7 +76,7 @@ button {
   filter: brightness(60%);
   height: 260px;
 }
-.content-wrapper{
+.content-wrapper {
   position: absolute;
   top: 0;
   left: 0;
@@ -86,7 +86,6 @@ button {
   margin-left: 20px;
   font-size: 20px;
   color: #9bacc8;
-  
 }
 .card .content-wrapper {
   animation: slideInRight 0.5s ease-out;
@@ -129,9 +128,9 @@ button {
   border-radius: 50px;
   height: 30px;
   width: 150px;
-  -webkit-box-shadow: 11px 10px 52px -6px rgba(0,0,1,1);
-  -moz-box-shadow: 11px 10px 52px -6px rgba(0,0,1,1);
-  box-shadow: 11px 10px 52px -6px rgba(0,0,1,1);
+  -webkit-box-shadow: 11px 10px 52px -6px rgba(0, 0, 1, 1);
+  -moz-box-shadow: 11px 10px 52px -6px rgba(0, 0, 1, 1);
+  box-shadow: 11px 10px 52px -6px rgba(0, 0, 1, 1);
 }
 
 h3 {
@@ -237,7 +236,7 @@ hr {
   animation-name: quiet;
 }
 
-.wrapper{
+.wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -246,14 +245,43 @@ hr {
 
 hr {
   width: 700px;
-  animation: expand .5s ease-in-out;
+  animation: expand 0.5s ease-in-out;
 }
 
 @keyframes expand {
-   0% {
+  0% {
     transform: scaleX(0);
   }
   100% {
     transform: scaleX(1);
   }
+}
+
+#current-song-container {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #4a586e;
+  height: 110px;
+  z-index: 9999;
+  -webkit-box-shadow: 7px -14px 47px 4px rgba(0, 0, 0, 0.34);
+  -moz-box-shadow: 7px -14px 47px 4px rgba(0, 0, 0, 0.34);
+  box-shadow: 7px -14px 47px 4px rgba(0, 0, 0, 0.34);
+
+}
+#current-song-image{
+  height: 80px;
+  width: 75px;
+  align-items: center;
+  margin-top: 20px;
+  border-radius: 10px;
+}
+.footer-wrap{
+  display: flex;
+  flex-direction: row;
+}
+.footer-wrap > * {
+  margin: 40px;
 }

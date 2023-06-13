@@ -5,7 +5,15 @@ const searchInput = document.getElementById('search-input');
 const searchButton = document.getElementById('search-button');
 const resultsContainer = document.getElementById('results-container');
 const favoritesContainer = document.getElementById('favorites-container');
-const scrollButton  = document.getElementById('switchButton');
+const switchButton = document.getElementById('switchButton');
+const currentSongContainer = document.getElementById('current-song-container');
+const currentSongImage = document.getElementById('current-song-image');
+const currentSongTitle = document.getElementById('current-song-title');
+const currentSongArtist = document.getElementById('current-song-artist');
+const currentSongAudio = document.getElementById('current-song-audio');
+
+
+let currentTrack = null;
 
 searchButton.addEventListener('click', searchTracks);
 favoritesContainer.addEventListener('click', removeFavorite);
@@ -21,44 +29,44 @@ switchButton.onclick = function() {
 }
 
 function searchTracks() {
-    const query = searchInput.value.trim();
-    if (query === '') {
-        return;
+  const query = searchInput.value.trim();
+  if (query === '') {
+    return;
+  }
+
+  resultsContainer.innerHTML = '';
+
+  fetch(`https://deezerdevs-deezer.p.rapidapi.com/search?q=${query}`, {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-host': 'deezerdevs-deezer.p.rapidapi.com',
+      'x-rapidapi-key': API_KEY
     }
-
-    resultsContainer.innerHTML = '';
-
-    fetch(`https://deezerdevs-deezer.p.rapidapi.com/search?q=${query}`, {
-        method: 'GET',
-        headers: {
-            'x-rapidapi-host': 'deezerdevs-deezer.p.rapidapi.com',
-            'x-rapidapi-key': API_KEY
-        }
-    })
+  })
     .then(response => response.json())
     .then(data => {
-        const tracks = data.data;
-        if (tracks.length === 0) {
-            resultsContainer.innerHTML = 'No results found.';
-        } else {
-            displayTracks(tracks);
-        }
+      const tracks = data.data;
+      if (tracks.length === 0) {
+        resultsContainer.innerHTML = 'No results found.';
+      } else {
+        displayTracks(tracks);
+      }
     })
     .catch(error => {
-        console.error('Error:', error);
-        resultsContainer.innerHTML = 'An error occurred.';
+      console.error('Error:', error);
+      resultsContainer.innerHTML = 'An error occurred.';
     });
 }
 
 function displayTracks(tracks) {
   if (!tracks || tracks.length === 0) {
-      resultsContainer.innerHTML = 'No results found.';
-      return;
+    resultsContainer.innerHTML = 'No results found.';
+    return;
   }
 
   tracks.forEach(track => {
-      const card = createCard(track);
-      resultsContainer.appendChild(card);
+    const card = createCard(track);
+    resultsContainer.appendChild(card);
   });
 }
 
@@ -66,27 +74,31 @@ function displayTracks(tracks) {
 function createCard(track) {
   const card = document.createElement('div');
   card.classList.add('card');
-  
+
   card.innerHTML = `
     <img src="${track.album.cover_medium}" alt="${track.album.title}">
-   <div class="content-wrapper">
-    <h3>${track.title}</h3>
-    <p>${track.artist.name}</p>
-    <p>${track.album.title}</p>
+    <div class="content-wrapper">
+      <h3>${track.title}</h3>
+      <p>${track.artist.name}</p>
+      <p>${track.album.title}</p>
     </div>
     <div class="audio-container">
       <audio src="${track.preview}" controls></audio>
     </div>
     <button>Add to Favorites</button>
   `;
-  
+
   const addButton = card.querySelector('button');
   addButton.addEventListener('click', () => addToFavorites(addButton, track));
-  
+
+  const audioElement = card.querySelector('audio');
+  audioElement.addEventListener('play', () => updateCurrentSong(track));
+  audioElement.addEventListener('pause', () => clearCurrentSong());
+
   const favorites = getFavorites();
   if (favorites.some(favorite => favorite.id === track.id)) {
-      card.classList.add('favorite');
-      addButton.disabled = true;
+    card.classList.add('favorite');
+    addButton.disabled = true;
   }
 
   return card;
@@ -104,42 +116,59 @@ function addToFavorites(button, track) {
 }
 
 function getFavorites() {
-    const favorites = localStorage.getItem('favorites');
-    return favorites ? JSON.parse(favorites) : [];
+  const favorites = localStorage.getItem('favorites');
+  return favorites ? JSON.parse(favorites) : [];
 }
 
 function saveFavorites(favorites) {
-    localStorage.setItem('favorites', JSON.stringify(favorites));
+  localStorage.setItem('favorites', JSON.stringify(favorites));
 }
 
 function displayFavorites(favorites) {
-    favoritesContainer.innerHTML = '';
+  favoritesContainer.innerHTML = '';
 
-    if (favorites.length === 0) {
-        favoritesContainer.innerHTML = 'No favorites added yet.';
-    } else {
-        favorites.forEach(track => {
-            const card = createCard(track);
-            const removeButton = document.createElement('button');
-            removeButton.textContent = 'Remove from Favorites';
-            removeButton.addEventListener('click', () => removeFavorite(track));
-            card.appendChild(removeButton);
-            favoritesContainer.appendChild(card);
-        });
-    }
+  if (favorites.length === 0) {
+    favoritesContainer.innerHTML = 'No favorites added yet.';
+  } else {
+    favorites.forEach(track => {
+      const card = createCard(track);
+      const removeButton = document.createElement('button');
+      removeButton.textContent = 'Remove from Favorites';
+      removeButton.addEventListener('click', () => removeFavorite(track));
+      card.appendChild(removeButton);
+      favoritesContainer.appendChild(card);
+    });
+  }
 }
 
 function removeFavorite(track) {
-    const favorites = getFavorites();
-    const index = favorites.findIndex(favorite => favorite.id === track.id);
-    if (index > -1) {
-        favorites.splice(index, 1);
-        saveFavorites(favorites);
-        displayFavorites(favorites);
-    }
+  const favorites = getFavorites();
+  const index = favorites.findIndex(favorite => favorite.id === track.id);
+  if (index > -1) {
+    favorites.splice(index, 1);
+    saveFavorites(favorites);
+    displayFavorites(favorites);
+  }
 }
 
+function updateCurrentSong(track) {
+  currentSongContainer.style.display = 'block';
+  currentTrack = track;
+  currentSongImage.src = track.album.cover_medium;
+  currentSongImage.alt = track.album.title;
+  currentSongTitle.textContent = track.title;
+  currentSongArtist.textContent = track.artist.name;
+  currentSongAudio.src = track.preview;
+}
+
+function clearCurrentSong() {
+  currentSongContainer.style.display = 'none';
+  currentTrack = null;
+  currentSongImage.src = '';
+  currentSongImage.alt = '';
+  currentSongTitle.textContent = '';
+  currentSongArtist.textContent = '';
+}
 
 const initialFavorites = getFavorites();
 displayFavorites(initialFavorites);
-
