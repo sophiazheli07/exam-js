@@ -11,6 +11,7 @@ const currentSongImage = document.getElementById('current-song-image');
 const currentSongTitle = document.getElementById('current-song-title');
 const currentSongArtist = document.getElementById('current-song-artist');
 const currentSongAudio = document.getElementById('current-song-audio');
+const footerWrap = document.getElementsByClassName('footer-wrap');
 
 
 let currentTrack = null;
@@ -70,11 +71,13 @@ function displayTracks(tracks) {
   });
 }
 
-// Create card
+let currentAudio = null; 
+
 function createCard(track) {
   const card = document.createElement('div');
   card.classList.add('card');
 
+  // Card content
   card.innerHTML = `
     <img src="${track.album.cover_medium}" alt="${track.album.title}">
     <div class="content-wrapper">
@@ -85,15 +88,29 @@ function createCard(track) {
     <div class="audio-container">
       <audio src="${track.preview}" controls></audio>
     </div>
-    <button>Add to Favorites</button>
   `;
 
-  const addButton = card.querySelector('button');
+  const addButton = document.createElement('button');
+  addButton.classList.add('add-to-favorites-button');
+  addButton.textContent = 'Add to Favorites';
   addButton.addEventListener('click', () => addToFavorites(addButton, track));
+  card.appendChild(addButton);
 
   const audioElement = card.querySelector('audio');
-  audioElement.addEventListener('play', () => updateCurrentSong(track));
-  audioElement.addEventListener('pause', () => clearCurrentSong());
+
+  audioElement.addEventListener('play', () => {
+    if (currentAudio && currentAudio !== audioElement) {
+      currentAudio.pause();
+    }
+    currentAudio = audioElement; 
+    updateCurrentSong(track);
+  });
+
+  audioElement.addEventListener('pause', () => {
+    if (currentAudio === audioElement) {
+      clearCurrentSong();
+    }
+  });
 
   const favorites = getFavorites();
   if (favorites.some(favorite => favorite.id === track.id)) {
@@ -104,8 +121,18 @@ function createCard(track) {
   return card;
 }
 
+
+
+
 function addToFavorites(button, track) {
   const favorites = getFavorites();
+
+
+  if (favorites.some(favorite => favorite.id === track.id)) {
+    alert('This song is already in your favorites!');
+    return;
+  }
+
   favorites.push(track);
   saveFavorites(favorites);
   displayFavorites(favorites);
@@ -115,6 +142,7 @@ function addToFavorites(button, track) {
   button.classList.add('added-to-favorites');
 }
 
+
 function getFavorites() {
   const favorites = localStorage.getItem('favorites');
   return favorites ? JSON.parse(favorites) : [];
@@ -123,6 +151,7 @@ function getFavorites() {
 function saveFavorites(favorites) {
   localStorage.setItem('favorites', JSON.stringify(favorites));
 }
+
 
 function displayFavorites(favorites) {
   favoritesContainer.innerHTML = '';
@@ -151,7 +180,10 @@ function removeFavorite(track) {
   }
 }
 
+
+
 function updateCurrentSong(track) {
+  const footerWrap = document.querySelector('.footer-wrap');
   currentSongContainer.style.display = 'block';
   currentTrack = track;
   currentSongImage.src = track.album.cover_medium;
@@ -159,8 +191,22 @@ function updateCurrentSong(track) {
   currentSongTitle.textContent = track.title;
   currentSongArtist.textContent = track.artist.name;
   currentSongAudio.src = track.preview;
+
+  const addButton = document.createElement('button');
+  addButton.classList.add('add-to-favorites-button');
+  addButton.textContent = 'Add to Favorites';
+  addButton.addEventListener('click', () => addToFavorites(addButton, track));
+
+  const existingButton = footerWrap.querySelector('.add-to-favorites-button');
+  if (existingButton) {
+    existingButton.remove();
+  }
+
+  footerWrap.appendChild(addButton);
 }
 
+
+  
 function clearCurrentSong() {
   currentSongContainer.style.display = 'none';
   currentTrack = null;
